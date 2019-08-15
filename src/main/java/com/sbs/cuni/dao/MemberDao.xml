@@ -103,5 +103,7 @@
 		<id property="emailAuthKey" column="emailAuthKey" />
 		<id property="emailAuthStatus" column="emailAuthStatus" />
 		<id property="delStatus" column="delStatus" />
+		<id property="email" column="email"></id>
+		<id property="permissionLevel" column="permissionLevel"></id>
 	</resultMap>
 </mapper>

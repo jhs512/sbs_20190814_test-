@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sbs.cuni.dto.Article;
 import com.sbs.cuni.dto.ArticleReply;
 import com.sbs.cuni.dto.Board;
+import com.sbs.cuni.dto.Member;
 import com.sbs.cuni.service.ArticleService;
+import com.sbs.cuni.service.MemberService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ArticleController {
 	@Autowired
 	private ArticleService articleService;
+	@Autowired
+	private MemberService memberService;
 
 	// 게시물 리스팅
 	@RequestMapping("article/list")
@@ -157,6 +161,19 @@ public class ArticleController {
 	@RequestMapping("/article/doDelete")
 	public String doDelete(Model model, @RequestParam Map<String, Object> param, HttpSession session, long id, long boardId) {
 		param.put("id", id);
+		
+		Article article = articleService.getOne(Maps.of("id", id));
+		long memberId = article.getMemberId();
+		Member member = memberService.getOne((long)session.getAttribute("loginedMemberId"));
+		int memberLevel = member.getPermissionLevel();
+		
+		//게시물이 가지고있는 memberId 가 현재 접속한 멤버 아이디와 다를경우 또는 지금 멤버의 관리자 레벨이 1이 아닌경우
+		if(((long)session.getAttribute("loginedMemberId") != memberId) || ((long)session.getAttribute("loginedMemberId") != memberId && memberLevel != 1)) {
+			model.addAttribute("alertMsg", "접근 권한이 없습니다.");
+			model.addAttribute("historyBack", "true");
+			
+			return "common/redirect";
+		}
 
 		Map<String, Object> deleteRs = articleService.delete(param);
 
