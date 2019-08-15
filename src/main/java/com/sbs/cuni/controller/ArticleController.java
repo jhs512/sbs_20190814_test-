@@ -84,7 +84,19 @@ public class ArticleController {
 	}
 
 	@RequestMapping("/article/add")
-	public String showAdd(long boardId, Model model) {
+	public String showAdd(long boardId, Model model, HttpSession session) {
+		
+		Member member = memberService.getOne((long)session.getAttribute("loginedMemberId"));
+		long memberLevel = member.getPermissionLevel();
+		
+		//boardId 가 1이면서 접속 멤버의 관리자 레벨이 0이면 접근 못함
+		if(boardId == 1 && memberLevel != 1) {
+			model.addAttribute("alertMsg", "접근 권한이 없습니다.");
+			model.addAttribute("historyBack", "true");
+			
+			return "common/redirect";
+		}
+		
 		Board board = articleService.getBoard(boardId);
 
 		model.addAttribute("board", board);
