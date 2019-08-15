@@ -107,8 +107,19 @@ public class ArticleController {
 	}
 
 	@RequestMapping("/article/modify")
-	public String showModify(@RequestParam(value = "id", defaultValue = "0") int id, long boardId, Model model) {
-
+	public String showModify(@RequestParam(value = "id", defaultValue = "0") int id, long boardId, Model model, HttpSession session) {
+		
+		Article article = articleService.getOne(Maps.of("id", id));
+		
+		//게시물이 가지고있는 멤버아이디 != 지금 접속한 멤버 아이디
+		if(article.getMemberId() != (long)session.getAttribute("loginedMemberId")) {
+			model.addAttribute("alertMsg", "접근 권한이 없습니다.");
+			model.addAttribute("historyBack", "true");
+			
+			return "common/redirect";
+		}
+		
+		
 		Board board = articleService.getBoard(boardId);
 
 		model.addAttribute("board", board);
@@ -119,8 +130,6 @@ public class ArticleController {
 
 			return "common/redirect";
 		}
-
-		Article article = articleService.getOne(Maps.of("id", id));
 
 		model.addAttribute("article", article);
 
