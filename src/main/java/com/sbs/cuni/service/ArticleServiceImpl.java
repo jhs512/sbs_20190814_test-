@@ -119,16 +119,24 @@ public class ArticleServiceImpl implements ArticleService {
 
 	public Map<String, Object> updateReply(Map<String, Object> args) {
 
-		Map<String, Object> rs = new HashMap<String, Object>();
+		ArticleReply reply = articleDao.getReply((long)args.get("id"));
+		
+		String msg = "";
+		String resultCode = "";
+		
+		if (reply == null) {
+			msg = "존재하지 않는 댓글 정보";
+			resultCode = "F-4";
+		} else if (reply.getMemberId() != (long)args.get("memberId")) {
+			msg = "권한이 없습니다.";
+			resultCode = "F-4";
+		} else {
+			articleDao.modifyReply(args);
+			msg = "댓글이 수정되었습니다.";
+			resultCode = "S-4";
+		}
 
-		articleDao.modifyReply(args);
-
-		long id = (long) args.get("id");
-
-		rs.put("resultCode", "S-1");
-		rs.put("msg", id + "번 댓글이 수정되었습니다.");
-
-		return rs;
+		return Maps.of("msg", msg, "resultCode", resultCode);
 	}
 
 	public Map<String, Object> delete(Map<String, Object> args) {

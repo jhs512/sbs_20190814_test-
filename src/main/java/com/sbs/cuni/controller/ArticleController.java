@@ -251,7 +251,9 @@ public class ArticleController {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
+		
+		//댓글 아이디랑 내용 넘어오고있음 댓글의 M.id와 현재 로그인한 멤버와 같아야함
+		param.put("memberId", (long)session.getAttribute("loginedMemberId"));
 		param.put("id", id);
 
 		Map<String, Object> updateRs = articleService.updateReply(param);
