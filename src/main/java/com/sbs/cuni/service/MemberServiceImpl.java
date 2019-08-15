@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.TempKey;
 import com.sbs.cuni.dao.MemberDao;
 import com.sbs.cuni.dto.Member;
 import com.sbs.cuni.handler.MailHandler;
@@ -127,20 +128,30 @@ public class MemberServiceImpl implements MemberService {
 		Member member = memberDao.searchPw(param);
 		String msg = null;
 		String resultCode = null;
-		MailHandler mail;
-		try {
-			mail = new MailHandler(sender);
-			mail.setFrom(emailSender, emailSenderName);
-			mail.setTo((String) param.get("email"));
-			mail.setSubject("회원님의 비밀번호가 발송되었습니다");
-			mail.setText(new StringBuffer().append("<h1>비밀번호는 " + member.getLoginPw() + " 입니다.</h1>").toString());
-			mail.send();
-			msg = "메일이 발송되었습니다.";
-			resultCode = "S-2";
-		} catch (Exception e) {
-			msg = "메일 발송에 실패했습니다.";
-			resultCode = "F-2";
-			e.printStackTrace();
+		if(member == null) {
+			msg = "회원정보가 존재하지 않습니다.";
+			resultCode = "F-5";
+		} else {
+			param.put("newPw", new TempKey(5).getKey());
+			param.put("id", member.getId());
+			
+			MailHandler mail;
+			try {
+				mail = new MailHandler(sender);
+				mail.setFrom(emailSender, emailSenderName);
+				mail.setTo((String) param.get("email"));
+				mail.setSubject("회원님의 비밀번호가 발송되었습니다");
+				mail.setText(new StringBuffer().append("<h1>비밀번호는 " + (String)param.get("newPw") + " 입니다.</h1>").toString());
+				mail.send();
+				memberDao.modifyPw(param);
+				msg = "메일이 발송되었습니다.";
+				resultCode = "S-2";
+			} catch (Exception e) {
+				msg = "메일 발송에 실패했습니다.";
+				resultCode = "F-2";
+				e.printStackTrace();
+			}
+			
 		}
 		return Maps.of("msg", msg, "resultCode", resultCode);
 	}

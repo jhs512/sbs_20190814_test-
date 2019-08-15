@@ -36,6 +36,12 @@
 		AND email =
 		#{email}
 	</select>
+	
+	<update id="modifyPw" parameterType="map">
+		UPDATE member
+		SET loginPw = #{newPw}
+		WHERE id = #{id}
+	</update>
 
 	<select id="doubleCheck" parameterType="map"
 		resultType="Integer">
