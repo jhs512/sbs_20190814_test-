@@ -7,11 +7,14 @@
 		<if test="extra__repliesCount == true">
 			, COUNT(DISTINCT AR.id) AS extra__repliesCount
 		</if>
+		, M.name AS extra__articleWriter
 		FROM article AS A
 		<if test="leftJoin__articleReply == true">
 			LEFT JOIN articleReply AS AR
 			ON A.id = AR.articleId
 		</if>
+		LEFT JOIN member AS M
+		ON A.memberId = M.id
 		WHERE 1 = 1
 		<if test="boardId != null and boardId != ''">
 			AND A.boardId = #{boardId}
@@ -52,13 +55,15 @@
 
 	<select id="getReplies" parameterType="map"
 		resultMap="ArticleReply">
-		SELECT *
-		FROM articleReply
-		WHERE articleId = #{articleId}
+		SELECT AR.*, M.name AS extra__replyWriter
+		FROM articleReply AS AR
+		LEFT OUTER JOIN member AS M
+		ON AR.memberId = M.id
+		WHERE AR.articleId = 1
 		<if test="from > 0">
-			AND id >= #{from}
+			AND AR.id >= #{from}
 		</if>
-		ORDER BY id ASC
+		ORDER BY AR.id ASC
 	</select>
 
 
@@ -152,7 +157,8 @@
 		<id property="boardId" column="boardId" />
 		<id property="passwd" column="passwd" />
 		<association property="extra" javaType="java.util.HashMap">
-			<result property="repliesCount" column="extra__repliesCount" />
+			<id property="articleWriter" column="extra__articleWriter"/>
+			<id property="repliesCount" column="extra__repliesCount"/>
 		</association>
 	</resultMap>
 
@@ -164,6 +170,7 @@
 		<id property="memberId" column="memberId" />
 		<id property="body" column="body" />
 		<association property="extra" javaType="java.util.HashMap">
+			<id property="replyWriter" column="extra__replyWriter"/>
 		</association>
 	</resultMap>
 </mapper>

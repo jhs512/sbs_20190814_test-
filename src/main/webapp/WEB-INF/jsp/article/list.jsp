@@ -39,6 +39,7 @@
 		<colgroup>
 			<col width="80">
 			<col width="180">
+			<col width="100">
 			<col>
 			<col width="100">
 			<col width="100">
@@ -47,6 +48,7 @@
 			<tr>
 				<th>ID</th>
 				<th>등록날짜</th>
+				<th>작성자</th>
 				<th>제목</th>
 				<th>댓글</th>
 				<th>비고</th>
@@ -57,6 +59,7 @@
 				<tr>
 					<td><c:out value="${article.id}" /></td>
 					<td><c:out value="${article.regDate}" /></td>
+					<td><c:out value="${article.extra.articleWriter}"/></td>
 					<td><a href="detail?id=${article.id}&boardId=${param.boardId}"><c:out
 								value="${article.title}" /></a></td>
 					<td><c:out value="${article.extra.repliesCount}" /></td>
