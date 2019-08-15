@@ -1,0 +1,111 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+
+<c:set var="path"
+	value="${requestScope['javax.servlet.forward.servlet_path']}" />
+
+<c:set var="isArticleDeleteAvailable"
+	value="${path == '/article/detail' || path == '/article/modify'}" />
+
+<c:set var="isArticleModifyAvailable"
+	value="${path == '/article/detail'}" />
+
+<c:set var="isMemberModifyAvailable" value="${path == '/member/myPage'}" />
+
+<c:set var="currentUrl"
+	value="${requestScope['javax.servlet.forward.request_uri']}?${pageContext.request.queryString}" />
+
+<c:url var="headRedirectUrl"
+	value="${requestScope['javax.servlet.forward.request_uri']}">
+	<c:forEach items="${param}" var="entry">
+		<c:if test="${entry.key != 'redirectUrl'}">
+			<c:param name="${entry.key}" value="${entry.value}" />
+		</c:if>
+	</c:forEach>
+</c:url>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title><c:out value="${logoText}" /> - <c:out
+		value="${pageTitle}" /></title>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="/resource/common.js"></script>
+<script src="/resource/app.js"></script>
+
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
+<link rel="stylesheet" href="/resource/common.css">
+<link rel="stylesheet" href="/resource/app.css">
+<script>
+	var loginedMemberId = parseInt('${loginedMemberId}');
+</script>
+</head>
+<body>
+	<div class="logo-bar con">
+		<h1>
+			<c:out value="${logoText}" />
+			-
+			<c:out value="${pageTitle}" />
+		</h1>
+	</div>
+
+	<div class="top-bar con margin-top-size-1">
+		<nav class="menu-1">
+			<ul class="row">
+				<li class="cell margin-right-size-1"><a href="/"
+					class="block btn-a">홈</a></li>
+
+				<li class="cell margin-right-size-1"><a
+					href="/article/list?boardId=1" class="block btn-a">공지시항 글 리스트</a></li>
+				<li class="cell margin-right-size-1"><a
+					href="/article/list?boardId=2" class="block btn-a">자유 게시판 글 리스트</a></li>
+
+				<c:if test="${isLogined}">
+					<c:if test="${loginedMember.permissionLevel > 0}">
+						<li class="cell margin-right-size-1"><a
+							href="/article/add?boardId=1" class="block btn-a">공지사항 글 작성</a></li>
+					</c:if>
+					<li class="cell margin-right-size-1"><a
+						href="/article/add?boardId=2" class="block btn-a">자유 게시판 글 작성</a></li>
+					<c:if
+						test="${loginedMemberId == article.memberId && isArticleModifyAvailable && param.id != null}">
+						<li class="cell margin-right-size-1"><a
+							href="/article/modify?id=${article.id}&boardId=${param.boardId}"
+							class="block btn-a">글 수정</a></li>
+					</c:if>
+					<c:if test="${isArticleDeleteAvailable && param.id != null}">
+						<c:if
+							test="${loginedMemberId == article.memberId || loginedMember.permissionLevel > 0}">
+							<li class="cell margin-right-size-1"><a
+								onclick="return confirm('정말 삭제하시겠습니까?');"
+								href="/article/doDelete?id=${article.id}&boardId=${param.boardId}"
+								class="block btn-a">글 삭제</a></li>
+						</c:if>
+					</c:if>
+					<li class="cell margin-right-size-1"><a href="/member/myPage"
+						class="block btn-a">마이페이지</a></li>
+					<li class="cell margin-right-size-1"><a
+						href="/member/modify?id=${member.id}" class="block btn-a">회원정보수정</a></li>
+					<li class="cell margin-right-size-1"><a
+						href="/member/doLogout" class="block btn-a">로그아웃</a></li>
+				</c:if>
+
+				<c:if test="${isLogined == false}">
+					<li class="cell margin-right-size-1"><a
+						href="/member/login?redirectUrl=${headRedirectUrl}"
+						class="block btn-a">로그인</a></li>
+					<li class="cell margin-right-size-1"><a
+						href="/member/findInfo" class="block btn-a">아이디/비번찾기</a></li>
+					<li class="cell margin-right-size-1"><a
+						href="/member/join?redirectUrl=${headRedirectUrl}"
+						class="block btn-a">가입</a></li>
+				</c:if>
+			</ul>
+		</nav>
+	</div>
+	<div class="margin-top-size-1"></div>

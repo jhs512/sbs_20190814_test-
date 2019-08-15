@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sbs.cuni.dao.ArticleDao">
+	<select id="getList" parameterType="map" resultMap="Article">
+		SELECT A.*
+		<if test="extra__repliesCount == true">
+			, COUNT(DISTINCT AR.id) AS extra__repliesCount
+		</if>
+		FROM article AS A
+		<if test="leftJoin__articleReply == true">
+			LEFT JOIN articleReply AS AR
+			ON A.id = AR.articleId
+		</if>
+		WHERE 1 = 1
+		<if test="boardId != null and boardId != ''">
+			AND A.boardId = #{boardId}
+		</if>
+		<if
+			test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+			<if test="searchType == 'title'">AND A.title LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'body'">AND A.body LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		</if>
+		<if test="title != null and title != ''">AND A.title = #{title}</if>
+		<if test="groupBy__articleId == true">
+			GROUP BY A.id
+		</if>
+		<if test="arrayType != null and arrayType != ''">
+			<if test="arrayType == 'new'">ORDER BY A.id DESC</if>
+			<if test="arrayType == 'old'">ORDER BY A.id ASC</if>
+		</if>
+		<if test="arrayType == null or arrayType == ''">
+			ORDER BY A.id DESC
+		</if>
+		LIMIT #{limitOffset}, #{limit}
+	</select>
+
+	<select id="getCount" parameterType="map" resultType="int">
+		SELECT
+		COUNT(*)
+		FROM article AS A
+		WHERE 1 = 1
+		<if test="boardId != null and boardId != ''">
+			AND A.boardId = #{boardId}
+		</if>
+		<if
+			test="searchType != null and searchType != '' and searchKeyword != null and searchKeyword != ''">
+			<if test="searchType == 'title'">AND A.title LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+			<if test="searchType == 'body'">AND A.body LIKE CONCAT('%', #{searchKeyword}, '%')</if>
+		</if>
+	</select>
+
+	<select id="getReplies" parameterType="map"
+		resultMap="ArticleReply">
+		SELECT *
+		FROM articleReply
+		WHERE articleId = #{articleId}
+		<if test="from > 0">
+			AND id >= #{from}
+		</if>
+		ORDER BY id ASC
+	</select>
+
+
+	<select id="getOne" parameterType="map" resultMap="Article">
+		SELECT *
+		FROM
+		article
+		WHERE id = #{id}
+	</select>
+
+	<select id="getBoard" parameterType="long" resultType="Board">
+		SELECT *
+		FROM board
+		WHERE id = #{id}
+	</select>
+
+	<select id="getReply" resultMap="ArticleReply">
+		SELECT * FROM articleReply
+		WHERE
+		id = #{id}
+	</select>
+
+	<select id="getBoardId" parameterType="map" resultMap="Article">
+		SELECT *
+		FROM
+		article WHERE id = #{articleId}
+	</select>
+
+	<insert id="add" useGeneratedKeys="true" keyProperty="id"
+		parameterType="map">
+		INSERT INTO article
+		SET regDate = NOW(),
+		title = #{title},
+		body = #{body},
+		boardId = #{boardId},
+		memberId = #{memberId}
+	</insert>
+
+	<insert id="addReply" useGeneratedKeys="true" keyProperty="id"
+		parameterType="map">
+		INSERT INTO articleReply
+		SET regDate = NOW(),
+		articleId =
+		#{articleId},
+		boardId = #{boardId},
+		memberId = #{memberId},
+		body =
+		#{body}
+	</insert>
+
+	<update id="modify">
+		UPDATE article
+		<set>
+			<if test="title != null">title = #{title},</if>
+			<if test="body != null">body = #{body},</if>
+			<if test="boardId != null">boardId = 1,</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<update id="modifyReply" parameterType="map">
+		UPDATE articleReply
+		<set>
+			<if test="body != null">body = #{body},</if>
+			<if test="boardId != null">boardId = 1,</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<delete id="delete">
+		DELETE FROM article
+		WHERE id = #{id}
+	</delete>
+
+	<delete id="deleteReplies">
+		DELETE FROM articleReply
+		WHERE articleId = #{articleId}
+	</delete>
+
+	<delete id="deleteReply">
+		DELETE FROM articleReply
+		WHERE id= #{id}
+	</delete>
+
+	<resultMap id="Article" type="Article">
+		<id property="id" column="id" />
+		<id property="regDate" column="regDate" />
+		<id property="title" column="title" />
+		<id property="body" column="body" />
+		<id property="memberId" column="memberId" />
+		<id property="boardId" column="boardId" />
+		<id property="passwd" column="passwd" />
+		<association property="extra" javaType="java.util.HashMap">
+			<result property="repliesCount" column="extra__repliesCount" />
+		</association>
+	</resultMap>
+
+	<resultMap id="ArticleReply" type="ArticleReply">
+		<id property="id" column="id" />
+		<id property="regDate" column="regDate" />
+		<id property="articleId" column="articleId" />
+		<id property="boardId" column="boardId" />
+		<id property="memberId" column="memberId" />
+		<id property="body" column="body" />
+		<association property="extra" javaType="java.util.HashMap">
+		</association>
+	</resultMap>
+</mapper>
