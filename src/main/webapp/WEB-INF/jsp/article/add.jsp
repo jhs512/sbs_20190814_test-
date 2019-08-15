@@ -79,7 +79,7 @@
 						<th></th>
 						<td><input class="btn-a" type="submit" value="작성"> <input
 							class="btn-a" type="button" value="취소"
-							onclick="location.href = './list';"></td>
+							onclick="location.href = './list?boardId=${param.boardId}';"></td>
 					</tr>
 				</tbody>
 			</table>
